@@ -42,27 +42,7 @@ pub enum FetchError {
 }
 
 pub enum Scraper {
-    Pixiv(String)
-}
-
-async fn get_html(url: String) -> Result<Html, FetchError> {
-    let content = get_page_content(url).await?;
-    Ok(Html::parse_document(&content))
-}
-
-async fn get_page_content(url: String) -> Result<String, FetchError> {
-    let mut data = Vec::new();
-    let mut handle = Easy::new();
-    handle.url(&url)?;
-    {
-        let mut transfer = handle.transfer();
-        transfer.write_function(|new_data| {
-            data.extend_from_slice(new_data);
-            Ok(new_data.len())
-        })?;
-        transfer.perform()?;
-    }
-    Ok(str::from_utf8(&mut data)?.to_owned())
+    Pixiv(String),
 }
 
 impl Scraper {
