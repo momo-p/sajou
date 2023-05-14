@@ -1,12 +1,13 @@
 use curl::{easy::Easy, Error as CurlError, FormError as CurlFormError};
 use derive_more::Display;
 use regex::Error as RegexError;
-use scraper::{error::SelectorErrorKind, html::Html};
+use scraper::error::SelectorErrorKind;
 use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeJsonError;
 use std::{convert, str};
 
 mod pixiv;
+mod tests;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Image {
@@ -39,6 +40,7 @@ pub enum FetchError {
     CurlFormError(CurlFormError),
     SerdeJsonError(SerdeJsonError),
     NotFound(),
+    Other(String),
 }
 
 pub enum Scraper {
