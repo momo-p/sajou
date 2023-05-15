@@ -28,8 +28,8 @@ pub trait DiscordCommand {
     ) -> Result<(), CommandError>;
 }
 
-pub fn get_registered<'a>() -> HashMap<String, Box<dyn DiscordCommand + Send>> {
-    let mut commands: HashMap<String, Box<dyn DiscordCommand + Send>> = HashMap::new();
+pub fn get_registered<'a>() -> HashMap<String, Box<dyn DiscordCommand + Send + Sync>> {
+    let mut commands: HashMap<String, Box<dyn DiscordCommand + Send + Sync>> = HashMap::new();
     commands.insert("ping".to_owned(), Box::new(ping::PingCommand));
     commands
 }
@@ -38,15 +38,24 @@ pub fn get_registered<'a>() -> HashMap<String, Box<dyn DiscordCommand + Send>> {
 pub enum CommandError {
     DiscordError(DiscordError),
     SerenityError(Arc<SerenityError>),
+    NotFound(),
 }
 
 impl CommandError {
-    fn is_user_fault(&self) -> bool {
+    pub fn is_user_fault(&self) -> bool {
         match self {
             CommandError::DiscordError(_) => false,
             CommandError::SerenityError(_) => false,
             _ => true,
         }
+    }
+
+    pub fn to_message(&self) -> String {
+        match self {
+            CommandError::NotFound() => "Command not found",
+            _ => "",
+        }
+        .to_owned()
     }
 }
 
