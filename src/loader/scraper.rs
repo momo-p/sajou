@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeJsonError;
 use std::{convert, str};
 
+mod gallery_to_vec;
 mod pixiv;
 mod tests;
 
@@ -28,6 +29,22 @@ pub enum Artwork {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Gallery {
     pub works: Vec<Artwork>,
+}
+
+impl Artwork {
+    pub async fn to_vec(&self) -> Result<Vec<u8>, FetchError> {
+        gallery_to_vec::artwork_to_vec(&self).await
+    }
+}
+
+impl Gallery {
+    pub async fn to_vec_on_parallel(&self, workers_count: usize) -> Result<Vec<u8>, FetchError> {
+        gallery_to_vec::gallery_to_vec_on_parallel(&self, workers_count).await
+    }
+
+    pub async fn to_vec(&self) -> Result<Vec<u8>, FetchError> {
+        gallery_to_vec::gallery_to_vec(&self).await
+    }
 }
 
 #[derive(Debug, Display)]
