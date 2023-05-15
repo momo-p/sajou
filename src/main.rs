@@ -2,6 +2,7 @@ use crate::server_config::ServerConfig;
 use serenity::prelude::*;
 use std::sync::Arc;
 
+mod commands;
 mod database;
 mod handler;
 mod loader;
