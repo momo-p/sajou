@@ -4,8 +4,9 @@ use regex::Error as RegexError;
 use scraper::error::SelectorErrorKind;
 use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeJsonError;
-use std::{convert, str};
+use std::{convert, str, sync::Arc};
 
+mod gallery_to_vec;
 mod pixiv;
 mod tests;
 
@@ -30,7 +31,26 @@ pub struct Gallery {
     pub works: Vec<Artwork>,
 }
 
-#[derive(Debug, Display)]
+impl Artwork {
+    pub async fn to_vec(&self) -> Result<Vec<u8>, FetchError> {
+        gallery_to_vec::artwork_to_vec(&self).await
+    }
+}
+
+impl Gallery {
+    pub async fn to_vec_on_parallel(
+        &self,
+        workers_count: usize,
+    ) -> Result<Vec<Vec<u8>>, FetchError> {
+        gallery_to_vec::gallery_to_vec_on_parallel(&self, workers_count).await
+    }
+
+    pub async fn to_vec(&self) -> Result<Vec<Vec<u8>>, FetchError> {
+        gallery_to_vec::gallery_to_vec(&self).await
+    }
+}
+
+#[derive(Debug, Clone, Display)]
 pub enum FetchError {
     CurlError(CurlError),
     Utf8Error(str::Utf8Error),
@@ -38,7 +58,7 @@ pub enum FetchError {
     RegexError(RegexError),
     SiteStructureChanged(String),
     CurlFormError(CurlFormError),
-    SerdeJsonError(SerdeJsonError),
+    SerdeJsonError(Arc<SerdeJsonError>),
     NotFound(),
     Other(String),
 }
@@ -87,6 +107,6 @@ impl convert::From<CurlFormError> for FetchError {
 
 impl convert::From<SerdeJsonError> for FetchError {
     fn from(err: SerdeJsonError) -> Self {
-        FetchError::SerdeJsonError(err)
+        FetchError::SerdeJsonError(Arc::new(err))
     }
 }
