@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeJsonError;
 use std::{convert, str, sync::Arc};
 
+mod from_url;
 mod gallery_to_vec;
 mod pixiv;
 mod tests;
@@ -63,6 +64,7 @@ pub enum FetchError {
     Other(String),
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum Scraper {
     Pixiv(String),
 }
@@ -72,6 +74,10 @@ impl Scraper {
         match self {
             Scraper::Pixiv(id) => pixiv::fetch(id.to_owned()).await,
         }
+    }
+
+    pub fn from_url(url: String) -> Option<Self> {
+        from_url::from_url(url)
     }
 }
 
