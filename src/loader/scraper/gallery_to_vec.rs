@@ -1,5 +1,6 @@
 use super::{Artwork, FetchError, Gallery, Image, Video};
 use curl::easy::{Easy, List};
+use futures::prelude::*;
 
 pub async fn artwork_to_vec(work: &Artwork) -> Result<Vec<u8>, FetchError> {
     match work {
@@ -40,11 +41,22 @@ async fn video_to_vec(video: &Video) -> Result<Vec<u8>, FetchError> {
 pub async fn gallery_to_vec_on_parallel(
     gallery: &Gallery,
     workers_count: usize,
-) -> Result<Vec<u8>, FetchError> {
-    todo!()
+) -> Result<Vec<Vec<u8>>, FetchError> {
+    let result = futures::stream::iter(gallery.works.iter().map(|work| work.to_vec()))
+        .buffered(workers_count)
+        .collect::<Vec<_>>()
+        .await;
+    let mut works: Vec<Vec<u8>> = Vec::new();
+    for response in &result {
+        match response {
+            Ok(work) => works.push(work.to_vec()),
+            Err(err) => return Err(err.clone()),
+        };
+    }
+    Ok(works)
 }
 
-pub async fn gallery_to_vec(gallery: &Gallery) -> Result<Vec<u8>, FetchError> {
+pub async fn gallery_to_vec(gallery: &Gallery) -> Result<Vec<Vec<u8>>, FetchError> {
     gallery_to_vec_on_parallel(gallery, 1).await
 }
 
