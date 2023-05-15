@@ -22,7 +22,15 @@ async fn image_to_vec(image: &Image) -> Result<Vec<u8>, FetchError> {
         })?;
         transfer.perform()?;
     }
-    Ok(data)
+    match handle.response_code()? {
+        200 => Ok(data),
+        404 => Err(FetchError::NotFound()),
+        _ => Err(FetchError::Other(format!(
+            "fetching image {} failed with status code {}",
+            &image.url,
+            handle.response_code()?
+        ))),
+    }
 }
 
 async fn video_to_vec(video: &Video) -> Result<Vec<u8>, FetchError> {
