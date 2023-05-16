@@ -11,6 +11,7 @@ use serenity::{
 };
 use std::{collections::HashMap, convert, sync::Arc};
 
+mod fetch;
 mod ping;
 
 #[async_trait]
@@ -31,6 +32,7 @@ pub trait DiscordCommand {
 pub fn get_registered<'a>() -> HashMap<String, Box<dyn DiscordCommand + Send + Sync>> {
     let mut commands: HashMap<String, Box<dyn DiscordCommand + Send + Sync>> = HashMap::new();
     commands.insert("ping".to_owned(), Box::new(ping::PingCommand));
+    commands.insert("fetch".to_owned(), Box::new(fetch::FetchCommand));
     commands
 }
 
@@ -38,6 +40,8 @@ pub fn get_registered<'a>() -> HashMap<String, Box<dyn DiscordCommand + Send + S
 pub enum CommandError {
     DiscordError(DiscordError),
     SerenityError(Arc<SerenityError>),
+    InvalidUrl(),
+    UnsupportedSite(),
     NotFound(),
 }
 
@@ -53,6 +57,8 @@ impl CommandError {
     pub fn to_message(&self) -> String {
         match self {
             CommandError::NotFound() => "Command not found",
+            CommandError::InvalidUrl() => "Invalid URL",
+            CommandError::UnsupportedSite() => "Site not supported yet! Please open an issue via: https://github.com/quang19992/sajou/issues",
             _ => "",
         }
         .to_owned()
