@@ -20,15 +20,16 @@ struct PixivParser;
 
 impl UrlParser for PixivParser {
     fn from_url(&self, url: String) -> Option<Scraper> {
-        let re = Regex::new("https:\\/\\/www.pixiv.net\\/artworks\\/([0-9]+)").unwrap();
+        let re = Regex::new("https:\\/\\/www.pixiv.net(|\\/[A-Za-z0-9]+)\\/artworks\\/([0-9]+)")
+            .unwrap();
         let caps = re.captures(&url);
         if caps.is_none() {
             return None;
         }
         let caps = caps.unwrap();
-        if caps.get(1).is_none() {
+        if caps.get(2).is_none() {
             return None;
         }
-        Some(Scraper::Pixiv(caps.get(1).unwrap().as_str().to_owned()))
+        Some(Scraper::Pixiv(caps.get(2).unwrap().as_str().to_owned()))
     }
 }
