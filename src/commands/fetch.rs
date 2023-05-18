@@ -1,5 +1,6 @@
 use crate::{
     commands::{CommandError, DiscordCommand},
+    context::BotContext,
     loader::scraper::Scraper,
 };
 use rand::Rng;
@@ -92,7 +93,15 @@ impl FetchCommand {
     ) {
         let mut rng = rand::thread_rng();
 
-        let gallery = match scraper.fetch().await {
+        let bot_context = {
+            let data_read = context.data.read().await;
+            data_read
+                .get::<BotContext>()
+                .expect("Can't found bot context")
+                .clone()
+        };
+
+        let gallery = match scraper.fetch_with_context(Some(bot_context.clone())).await {
             Ok(gallery) => gallery,
             Err(err) => {
                 log::error!("{:?}", err);
