@@ -3,6 +3,7 @@ use serenity::prelude::*;
 use std::sync::Arc;
 
 mod commands;
+mod context;
 mod database;
 mod handler;
 mod loader;
@@ -14,6 +15,7 @@ async fn main() {
         Ok(config) => config,
         Err(err) => panic!("{:?}", err),
     };
+    let config_arc = Arc::new(config.clone());
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let database = Arc::new(
         database::bundle::Database::new()
@@ -25,6 +27,12 @@ async fn main() {
         .event_handler(handler::Handler)
         .await
         .expect("Error creating client");
+    {
+        let mut data = client.data.write().await;
+        data.insert::<context::BotContext>(Arc::new(context::BotContextInterface {
+            config: config_arc,
+        }));
+    }
     if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);
     }
