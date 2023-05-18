@@ -1,3 +1,4 @@
+use crate::context::BotContextInterface;
 use curl::{easy::Easy, Error as CurlError, FormError as CurlFormError};
 use derive_more::Display;
 use regex::Error as RegexError;
@@ -70,10 +71,17 @@ pub enum Scraper {
 }
 
 impl Scraper {
-    pub async fn fetch(&self) -> Result<Gallery, FetchError> {
+    pub async fn fetch_with_context(
+        &self,
+        context: Option<Arc<BotContextInterface>>,
+    ) -> Result<Gallery, FetchError> {
         match self {
-            Scraper::Pixiv(id) => pixiv::fetch(id.to_owned()).await,
+            Scraper::Pixiv(id) => pixiv::fetch_with_context(id.to_owned(), context).await,
         }
+    }
+
+    pub async fn fetch(&self) -> Result<Gallery, FetchError> {
+        self.fetch_with_context(None).await
     }
 
     pub fn from_url(url: String) -> Option<Self> {

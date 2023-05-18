@@ -1,4 +1,9 @@
-use crate::loader::scraper::{Artwork, FetchError, Gallery, Image, Scraper};
+use crate::{
+    context::BotContextInterface,
+    loader::scraper::{Artwork, FetchError, Gallery, Image, Scraper},
+    server_config::ServerConfig,
+};
+use std::sync::Arc;
 
 macro_rules! aw {
     ($e:expr) => {
@@ -16,6 +21,28 @@ fn single_artwork() {
                 url:
                     "https://i.pximg.net/img-original/img/2023/05/11/14/11/01/108027507_ugoira0.jpg"
                         .to_owned(),
+            }),]
+        }
+    )
+}
+
+#[test]
+#[ignore]
+fn single_artwork_with_ssid() {
+    let config = ServerConfig::load().unwrap();
+    let config_arc = Arc::new(config.clone());
+    let context = Arc::new(BotContextInterface {
+        config: config_arc.clone(),
+    });
+    let response =
+        aw!(Scraper::Pixiv("106296818".to_owned()).fetch_with_context(Some(context.clone())))
+            .unwrap();
+    assert_eq!(
+        response,
+        Gallery {
+            works: vec![Artwork::Image(Image {
+                url: "https://i.pximg.net/img-original/img/2023/03/17/19/00/03/106296818_p0.jpg"
+                    .to_owned(),
             }),]
         }
     )
