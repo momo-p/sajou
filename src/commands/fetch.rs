@@ -66,7 +66,9 @@ impl DiscordCommand for FetchCommand {
             .create_interaction_response(&context.http, |response| {
                 response
                     .kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|message| message.content(":ok:"))
+                    .interaction_response_data(|message| {
+                        message.content(format!("Source: {}", url.to_string()))
+                    })
             })
             .await?;
         let slf = self.clone();
