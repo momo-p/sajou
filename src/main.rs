@@ -30,7 +30,7 @@ async fn main() {
     {
         let mut data = client.data.write().await;
         data.insert::<context::BotContext>(Arc::new(context::BotContextInterface {
-            config: config_arc,
+            config: config_arc.clone(),
         }));
     }
     if let Err(why) = client.start().await {
