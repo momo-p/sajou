@@ -3,11 +3,13 @@ use std::{env, result::Result, str::FromStr};
 const RUST_ENV: &str = "RUST_ENV";
 const RUST_LOG: &str = "RUST_LOG";
 const DISCORD_TOKEN: &str = "DISCORD_TOKEN";
+const PIXIV_SSID: &str = "PIXIV_SSID";
 
 #[derive(Clone)]
 pub struct ServerConfig {
     pub is_production: bool,
     pub discord_token: String,
+    pub pixiv_ssid: String,
 }
 
 #[derive(Clone, Debug)]
@@ -49,6 +51,7 @@ impl ServerConfig {
         Ok(Self {
             is_production,
             discord_token: Self::get_str(&DISCORD_TOKEN).unwrap(),
+            pixiv_ssid: Self::get_str(&PIXIV_SSID).unwrap(),
         })
     }
 }
